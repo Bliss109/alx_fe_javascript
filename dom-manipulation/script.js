@@ -1,5 +1,6 @@
 const quoteDisplay = document.getElementById('quoteDisplay');
 const newQuoteButton = document.getElementById('newQuote');
+const categoryFilter = document.getElementById('categoryFilter');
 
 // Sample quotes
 const quotes = [
@@ -17,7 +18,6 @@ function showRandomQuote() {
 
 newQuoteButton.addEventListener('click', showRandomQuote);
 
-// Create a function to create the add quote form
 function createAddQuoteForm() {
   const form = document.createElement('form');
   form.innerHTML = `
@@ -29,7 +29,6 @@ function createAddQuoteForm() {
   form.addEventListener('submit', addQuote);
 }
 
-// Call the function to create the form
 createAddQuoteForm();
 
 function addQuote(event) {
@@ -42,10 +41,10 @@ function addQuote(event) {
   };
   quotes.push(newQuote);
   showRandomQuote(); // Display the newly added quote
+  populateCategoryFilter(); // Update category filter
   newQuoteText.value = '';
   newQuoteCategory.value = '';
 }
-const categoryFilter = document.getElementById('categoryFilter');
 
 function getUniqueCategories() {
   const categories = new Set();
@@ -55,11 +54,15 @@ function getUniqueCategories() {
 
 function populateCategoryFilter() {
   const uniqueCategories = getUniqueCategories();
+  categoryFilter.innerHTML = ''; // Clear existing options
+  const allOption = document.createElement('option');
+  allOption.value = 'all';
+  allOption.text = 'All Categories';
+  categoryFilter.appendChild(allOption);
   uniqueCategories.forEach(category => {
     const option = document.createElement('option');
     option.value = category;
-    option.text   
- = category;
+    option.text = category;
     categoryFilter.appendChild(option);
   });
 }
@@ -71,34 +74,19 @@ function  
   // Update quoteDisplay with filteredQuotes
 }
 
-// Call functions to populate category filter and show initial quotes
 populateCategoryFilter();
 showRandomQuote();
-// ... previous code
 
-function addQuote(event) {
-    // ... previous code
-  
-    // Update category filter if new category is added
-    populateCategoryFilter();
-  
-    // ... rest of the code
+function saveLastFilter(category) {
+  localStorage.setItem('lastFilter', category);
+}
+
+function restoreLastFilter() {
+  const lastFilter = localStorage.getItem('lastFilter');
+  if (lastFilter) {
+    categoryFilter.value = lastFilter;
+    filterQuotes();
   }
-  
-  // Function to save last selected filter to local storage
-  function saveLastFilter(category) {
-    localStorage.setItem('lastFilter', category);
-  }
-  
-  // Function to restore last selected filter from local storage
-  function restoreLastFilter() {
-    const lastFilter = localStorage.getItem('lastFilter');
-    if (lastFilter) {
-      categoryFilter.value = lastFilter;
-      filterQuotes();
-    }
-  }
-  
-  // Call restoreLastFilter on page load
-  restoreLastFilter();
-  
+}
+
+restoreLastFilter();
