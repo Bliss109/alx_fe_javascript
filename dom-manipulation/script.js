@@ -102,6 +102,7 @@ document.addEventListener('DOMContentLoaded', async function () {
       const data = await response.json();
       console.log('Quote synced with server:', data);
       notifyUser('Quote synced with server');
+      alert('Quotes synced with server!');
     } catch (error) {
       console.error('Error syncing with server:', error);
       notifyUser('Error syncing with server');
@@ -148,6 +149,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     populateCategories();
     showRandomQuote();
     notifyUser('Quotes have been updated from the server.');
+    alert('Quotes have been updated from the server.');
   }
 
   function notifyUser(message) {
