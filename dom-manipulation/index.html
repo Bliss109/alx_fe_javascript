@@ -7,37 +7,40 @@
   <style>
     body {
       font-family: Arial, sans-serif;
+      margin: 20px;
     }
     #quoteDisplay {
       margin: 20px 0;
       font-size: 1.5em;
     }
-    .quote-form {
+    .form-section {
       margin-top: 20px;
     }
-    .quote-form input {
+    .form-section input {
       margin: 5px 0;
       padding: 8px;
-      width: 80%;
+      width: calc(100% - 16px);
     }
-    .quote-form button {
+    .form-section button {
       padding: 8px 12px;
+      margin-top: 10px;
     }
   </style>
 </head>
 <body>
   <h1>Dynamic Quote Generator</h1>
+  <select id="categoryFilter">
+    <option value="all">All Categories</option>
+  </select>
   <div id="quoteDisplay">Press "Show New Quote" to see a quote.</div>
   <button id="newQuote">Show New Quote</button>
-  <div class="quote-form">
-    <input id="newQuoteText" type="text" placeholder="Enter a new quote" />
-    <input id="newQuoteCategory" type="text" placeholder="Enter quote category" />
-    <button onclick="addQuote()">Add Quote</button>
+  <div class="form-section">
+    <h2>Add a New Quote</h2>
+    <input type="text" id="newQuoteText" placeholder="Enter a new quote" required>
+    <input type="text" id="newQuoteAuthor" placeholder="Enter author name (optional)">
+    <input type="text" id="newQuoteCategory" placeholder="Enter quote category" required>
+    <button type="submit">Add Quote</button>
   </div>
-  <select id="categoryFilter" onchange="filterQuotes()">
-    <option value="all">All Categories</option>
-    <!-- Dynamically populated categories -->
-  </select>
   <script src="script.js"></script>
 </body>
 </html>
