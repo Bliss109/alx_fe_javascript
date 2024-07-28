@@ -145,12 +145,12 @@ document.addEventListener('DOMContentLoaded', async function () {
     notification.textContent = 'Quotes have been updated from the server.';
   }
 
-  async function periodicSync() {
+  async function syncQuotes() {
     await fetchQuotesFromServer();
-    setTimeout(periodicSync, 60000); // Sync every 60 seconds
+    setTimeout(syncQuotes, 60000); // Sync every 60 seconds
   }
 
   populateCategories();
   showRandomQuote();
-  periodicSync();
+  syncQuotes();
 });
