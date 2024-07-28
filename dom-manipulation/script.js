@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', function () {
   const quotes = [
     { id: 1, text: 'The only way to do great work is to love what you do.', author: 'Steve Jobs', category: 'Inspiration' },
     { id: 2, text: 'The only limit to our realization of tomorrow is our doubts of today.', author: 'Franklin D. Roosevelt', category: 'Inspiration' },
@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function populateCategories() {
     const categories = [...new Set(quotes.map(quote => quote.category))];
     categoryFilter.innerHTML = '<option value="all">All Categories</option>';
-    categories.forEach(category => {
+    categories.forEach(function (category) {
       const option = document.createElement('option');
       option.value = category;
       option.textContent = category;
@@ -29,7 +29,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function showRandomQuote() {
     const selectedCategory = categoryFilter.value;
-    const filteredQuotes = selectedCategory === 'all' ? quotes : quotes.filter(quote => quote.category === selectedCategory);
+    const filteredQuotes = selectedCategory === 'all' ? quotes : quotes.filter(function (quote) {
+      return quote.category === selectedCategory;
+    });
 
     if (filteredQuotes.length === 0) {
       quoteDisplay.textContent = 'No quotes available for the selected category.';
@@ -71,7 +73,9 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     quotes.push(newQuote);
 
-    if (![...categoryFilter.options].some(option => option.value === newQuoteCategory)) {
+    if (![...categoryFilter.options].some(function (option) {
+      return option.value === newQuoteCategory;
+    })) {
       const option = document.createElement('option');
       option.value = newQuoteCategory;
       option.textContent = newQuoteCategory;
@@ -93,44 +97,54 @@ document.addEventListener('DOMContentLoaded', () => {
         'Content-type': 'application/json; charset=UTF-8',
       },
     })
-      .then(response => response.json())
-      .then(data => {
+      .then(function (response) {
+        return response.json();
+      })
+      .then(function (data) {
         console.log('Quote synced with server:', data);
       })
-      .catch(error => {
+      .catch(function (error) {
         console.error('Error syncing with server:', error);
       });
   }
 
   function fetchQuotesFromServer() {
     fetch('https://jsonplaceholder.typicode.com/posts')
-      .then(response => response.json())
-      .then(data => {
-        const serverQuotes = data.map(item => ({
-          id: item.id,
-          text: item.title,
-          author: item.body,
-          category: 'Server',
-        }));
+      .then(function (response) {
+        return response.json();
+      })
+      .then(function (data) {
+        const serverQuotes = data.map(function (item) {
+          return {
+            id: item.id,
+            text: item.title,
+            author: item.body,
+            category: 'Server',
+          };
+        });
         resolveConflicts(serverQuotes);
       })
-      .catch(error => {
+      .catch(function (error) {
         console.error('Error fetching from server:', error);
       });
   }
 
   function resolveConflicts(serverQuotes) {
     const localQuotes = quotes.slice();
-    const allQuotes = [...localQuotes, ...serverQuotes];
-    const uniqueQuotes = allQuotes.reduce((acc, quote) => {
-      if (!acc.find(q => q.id === quote.id)) {
+    const allQuotes = localQuotes.concat(serverQuotes);
+    const uniqueQuotes = allQuotes.reduce(function (acc, quote) {
+      if (!acc.find(function (q) {
+        return q.id === quote.id;
+      })) {
         acc.push(quote);
       }
       return acc;
     }, []);
 
     quotes.length = 0;
-    uniqueQuotes.forEach(quote => quotes.push(quote));
+    uniqueQuotes.forEach(function (quote) {
+      quotes.push(quote);
+    });
 
     populateCategories();
     showRandomQuote();
