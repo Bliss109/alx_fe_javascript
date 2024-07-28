@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', async function () {
-  const quotes = [
+  const quotes = JSON.parse(localStorage.getItem('quotes')) || [
     { id: 1, text: 'The only way to do great work is to love what you do.', author: 'Steve Jobs', category: 'Inspiration' },
     { id: 2, text: 'The only limit to our realization of tomorrow is our doubts of today.', author: 'Franklin D. Roosevelt', category: 'Inspiration' },
     { id: 3, text: 'In the middle of difficulty lies opportunity.', author: 'Albert Einstein', category: 'Inspiration' },
@@ -72,6 +72,7 @@ document.addEventListener('DOMContentLoaded', async function () {
       category: newQuoteCategory,
     };
     quotes.push(newQuote);
+    localStorage.setItem('quotes', JSON.stringify(quotes));
 
     if (![...categoryFilter.options].some(function (option) {
       return option.value === newQuoteCategory;
@@ -100,8 +101,10 @@ document.addEventListener('DOMContentLoaded', async function () {
       });
       const data = await response.json();
       console.log('Quote synced with server:', data);
+      notifyUser('Quote synced with server');
     } catch (error) {
       console.error('Error syncing with server:', error);
+      notifyUser('Error syncing with server');
     }
   }
 
@@ -120,6 +123,7 @@ document.addEventListener('DOMContentLoaded', async function () {
       resolveConflicts(serverQuotes);
     } catch (error) {
       console.error('Error fetching from server:', error);
+      notifyUser('Error fetching from server');
     }
   }
 
@@ -139,18 +143,26 @@ document.addEventListener('DOMContentLoaded', async function () {
     uniqueQuotes.forEach(function (quote) {
       quotes.push(quote);
     });
+    localStorage.setItem('quotes', JSON.stringify(quotes));
 
     populateCategories();
     showRandomQuote();
-    notification.textContent = 'Quotes have been updated from the server.';
+    notifyUser('Quotes have been updated from the server.');
+  }
+
+  function notifyUser(message) {
+    notification.textContent = message;
+    notification.style.display = 'block';
+    setTimeout(function () {
+      notification.style.display = 'none';
+    }, 5000);
   }
 
   async function syncQuotes() {
     await fetchQuotesFromServer();
-    setTimeout(syncQuotes, 60000); // Sync every 60 seconds
   }
 
   populateCategories();
   showRandomQuote();
-  syncQuotes();
+  setInterval(syncQuotes, 60000); // Sync every 60 seconds
 });
