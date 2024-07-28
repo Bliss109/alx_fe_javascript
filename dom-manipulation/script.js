@@ -41,6 +41,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     const randomIndex = Math.floor(Math.random() * filteredQuotes.length);
     const randomQuote = filteredQuotes[randomIndex];
     quoteDisplay.textContent = `${randomQuote.text} - ${randomQuote.author ? randomQuote.author : 'Unknown'}`;
+    sessionStorage.setItem('lastQuote', quoteDisplay.textContent);
   }
 
   function filterQuotes() {
@@ -53,10 +54,12 @@ document.addEventListener('DOMContentLoaded', async function () {
 
   const newQuoteForm = document.querySelector('.form-section');
   newQuoteForm.innerHTML += `
-    <input type="text" id="newQuoteText" placeholder="Enter a new quote" required>
-    <input type="text" id="newQuoteAuthor" placeholder="Enter author name (optional)">
-    <input type="text" id="newQuoteCategory" placeholder="Enter quote category" required>
-    <button type="submit">Add Quote</button>
+    <form id="newQuoteForm">
+      <input type="text" id="newQuoteText" placeholder="Enter a new quote" required>
+      <input type="text" id="newQuoteAuthor" placeholder="Enter author name (optional)">
+      <input type="text" id="newQuoteCategory" placeholder="Enter quote category" required>
+      <button type="submit">Add Quote</button>
+    </form>
   `;
 
   async function addQuote(event) {
@@ -72,7 +75,7 @@ document.addEventListener('DOMContentLoaded', async function () {
       category: newQuoteCategory,
     };
     quotes.push(newQuote);
-    localStorage.setItem('quotes', JSON.stringify(quotes));
+    saveQuotes();
 
     if (![...categoryFilter.options].some(function (option) {
       return option.value === newQuoteCategory;
@@ -88,7 +91,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     await syncWithServer(newQuote);
   }
 
-  newQuoteForm.addEventListener('submit', addQuote);
+  document.getElementById('newQuoteForm').addEventListener('submit', addQuote);
 
   async function syncWithServer(newQuote) {
     try {
@@ -144,12 +147,16 @@ document.addEventListener('DOMContentLoaded', async function () {
     uniqueQuotes.forEach(function (quote) {
       quotes.push(quote);
     });
-    localStorage.setItem('quotes', JSON.stringify(quotes));
+    saveQuotes();
 
     populateCategories();
     showRandomQuote();
     notifyUser('Quotes have been updated from the server.');
     alert('Quotes have been updated from the server.');
+  }
+
+  function saveQuotes() {
+    localStorage.setItem('quotes', JSON.stringify(quotes));
   }
 
   function notifyUser(message) {
@@ -163,6 +170,32 @@ document.addEventListener('DOMContentLoaded', async function () {
   async function syncQuotes() {
     await fetchQuotesFromServer();
   }
+
+  function exportToJsonFile() {
+    const dataStr = JSON.stringify(quotes, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    const downloadLink = document.createElement('a');
+    downloadLink.href = url;
+    downloadLink.download = 'quotes.json';
+    downloadLink.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function importFromJsonFile(event) {
+    const fileReader = new FileReader();
+    fileReader.onload = function (event) {
+      const importedQuotes = JSON.parse(event.target.result);
+      quotes.push(...importedQuotes);
+      saveQuotes();
+      alert('Quotes imported successfully!');
+      populateCategories();
+      showRandomQuote();
+    };
+    fileReader.readAsText(event.target.files[0]);
+  }
+
+  document.getElementById('importFile').addEventListener('change', importFromJsonFile);
 
   populateCategories();
   showRandomQuote();
