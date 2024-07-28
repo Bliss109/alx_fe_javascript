@@ -1,16 +1,16 @@
 document.addEventListener('DOMContentLoaded', () => {
   const quotes = [
-    { text: 'The only way to do great work is to love what you do.', author: 'Steve Jobs', category: 'Inspiration' },
-    { text: 'The only limit to our realization of tomorrow is our doubts of today.', author: 'Franklin D. Roosevelt', category: 'Inspiration' },
-    { text: 'In the middle of difficulty lies opportunity.', author: 'Albert Einstein', category: 'Inspiration' },
+    { id: 1, text: 'The only way to do great work is to love what you do.', author: 'Steve Jobs', category: 'Inspiration' },
+    { id: 2, text: 'The only limit to our realization of tomorrow is our doubts of today.', author: 'Franklin D. Roosevelt', category: 'Inspiration' },
+    { id: 3, text: 'In the middle of difficulty lies opportunity.', author: 'Albert Einstein', category: 'Inspiration' },
     // Add more quotes as needed
   ];
 
   const quoteDisplay = document.getElementById('quoteDisplay');
   const newQuoteButton = document.getElementById('newQuote');
   const categoryFilter = document.getElementById('categoryFilter');
+  const notification = document.getElementById('notification');
 
-  // Function to populate category filter options
   function populateCategories() {
     const categories = [...new Set(quotes.map(quote => quote.category))];
     categoryFilter.innerHTML = '<option value="all">All Categories</option>';
@@ -22,7 +22,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Restore last selected filter from local storage
   const lastSelectedCategory = localStorage.getItem('selectedCategory');
   if (lastSelectedCategory) {
     categoryFilter.value = lastSelectedCategory;
@@ -65,13 +64,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const newQuoteCategory = document.getElementById('newQuoteCategory').value;
 
     const newQuote = {
+      id: Date.now(), // Simulate unique ID
       text: newQuoteText,
       author: newQuoteAuthor,
       category: newQuoteCategory,
     };
     quotes.push(newQuote);
 
-    // Update category filter options if the new category is unique
     if (![...categoryFilter.options].some(option => option.value === newQuoteCategory)) {
       const option = document.createElement('option');
       option.value = newQuoteCategory;
@@ -79,13 +78,71 @@ document.addEventListener('DOMContentLoaded', () => {
       categoryFilter.appendChild(option);
     }
 
-    showRandomQuote(); // Display the newly added quote
+    showRandomQuote();
     newQuoteForm.reset();
+    syncWithServer(newQuote);
   }
 
   newQuoteForm.addEventListener('submit', addQuote);
 
-  // Populate categories and display a random quote on page load
+  function syncWithServer(newQuote) {
+    fetch('https://jsonplaceholder.typicode.com/posts', {
+      method: 'POST',
+      body: JSON.stringify(newQuote),
+      headers: {
+        'Content-type': 'application/json; charset=UTF-8',
+      },
+    })
+      .then(response => response.json())
+      .then(data => {
+        console.log('Quote synced with server:', data);
+      })
+      .catch(error => {
+        console.error('Error syncing with server:', error);
+      });
+  }
+
+  function fetchQuotesFromServer() {
+    fetch('https://jsonplaceholder.typicode.com/posts')
+      .then(response => response.json())
+      .then(data => {
+        const serverQuotes = data.map(item => ({
+          id: item.id,
+          text: item.title,
+          author: item.body,
+          category: 'Server',
+        }));
+        resolveConflicts(serverQuotes);
+      })
+      .catch(error => {
+        console.error('Error fetching from server:', error);
+      });
+  }
+
+  function resolveConflicts(serverQuotes) {
+    const localQuotes = quotes.slice();
+    const allQuotes = [...localQuotes, ...serverQuotes];
+    const uniqueQuotes = allQuotes.reduce((acc, quote) => {
+      if (!acc.find(q => q.id === quote.id)) {
+        acc.push(quote);
+      }
+      return acc;
+    }, []);
+
+    quotes.length = 0;
+    uniqueQuotes.forEach(quote => quotes.push(quote));
+
+    populateCategories();
+    showRandomQuote();
+    notification.textContent = 'Quotes have been updated from the server.';
+  }
+
+  function periodicSync() {
+    fetchQuotesFromServer();
+    setTimeout(periodicSync, 60000); // Sync every 60 seconds
+  }
+
   populateCategories();
   showRandomQuote();
+  periodicSync();
 });
