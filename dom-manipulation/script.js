@@ -95,7 +95,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         method: 'POST',
         body: JSON.stringify(newQuote),
         headers: {
-          'Content-type': 'application/json; charset=UTF-8',
+          'Content-Type': 'application/json; charset=UTF-8',
         },
       });
       const data = await response.json();
