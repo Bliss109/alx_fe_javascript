@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', async function () {
   const quotes = [
     { id: 1, text: 'The only way to do great work is to love what you do.', author: 'Steve Jobs', category: 'Inspiration' },
     { id: 2, text: 'The only limit to our realization of tomorrow is our doubts of today.', author: 'Franklin D. Roosevelt', category: 'Inspiration' },
@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', function () {
     <button type="submit">Add Quote</button>
   `;
 
-  function addQuote(event) {
+  async function addQuote(event) {
     event.preventDefault();
     const newQuoteText = document.getElementById('newQuoteText').value;
     const newQuoteAuthor = document.getElementById('newQuoteAuthor').value;
@@ -84,49 +84,43 @@ document.addEventListener('DOMContentLoaded', function () {
 
     showRandomQuote();
     newQuoteForm.reset();
-    syncWithServer(newQuote);
+    await syncWithServer(newQuote);
   }
 
   newQuoteForm.addEventListener('submit', addQuote);
 
-  function syncWithServer(newQuote) {
-    fetch('https://jsonplaceholder.typicode.com/posts', {
-      method: 'POST',
-      body: JSON.stringify(newQuote),
-      headers: {
-        'Content-type': 'application/json; charset=UTF-8',
-      },
-    })
-      .then(function (response) {
-        return response.json();
-      })
-      .then(function (data) {
-        console.log('Quote synced with server:', data);
-      })
-      .catch(function (error) {
-        console.error('Error syncing with server:', error);
+  async function syncWithServer(newQuote) {
+    try {
+      const response = await fetch('https://jsonplaceholder.typicode.com/posts', {
+        method: 'POST',
+        body: JSON.stringify(newQuote),
+        headers: {
+          'Content-type': 'application/json; charset=UTF-8',
+        },
       });
+      const data = await response.json();
+      console.log('Quote synced with server:', data);
+    } catch (error) {
+      console.error('Error syncing with server:', error);
+    }
   }
 
-  function fetchQuotesFromServer() {
-    fetch('https://jsonplaceholder.typicode.com/posts')
-      .then(function (response) {
-        return response.json();
-      })
-      .then(function (data) {
-        const serverQuotes = data.map(function (item) {
-          return {
-            id: item.id,
-            text: item.title,
-            author: item.body,
-            category: 'Server',
-          };
-        });
-        resolveConflicts(serverQuotes);
-      })
-      .catch(function (error) {
-        console.error('Error fetching from server:', error);
+  async function fetchQuotesFromServer() {
+    try {
+      const response = await fetch('https://jsonplaceholder.typicode.com/posts');
+      const data = await response.json();
+      const serverQuotes = data.map(function (item) {
+        return {
+          id: item.id,
+          text: item.title,
+          author: item.body,
+          category: 'Server',
+        };
       });
+      resolveConflicts(serverQuotes);
+    } catch (error) {
+      console.error('Error fetching from server:', error);
+    }
   }
 
   function resolveConflicts(serverQuotes) {
@@ -151,8 +145,8 @@ document.addEventListener('DOMContentLoaded', function () {
     notification.textContent = 'Quotes have been updated from the server.';
   }
 
-  function periodicSync() {
-    fetchQuotesFromServer();
+  async function periodicSync() {
+    await fetchQuotesFromServer();
     setTimeout(periodicSync, 60000); // Sync every 60 seconds
   }
 
