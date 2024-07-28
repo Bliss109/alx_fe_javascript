@@ -1,33 +1,45 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const quotes = [
-      { text: "The only limit to our realization of tomorrow is our doubts of today.", category: "Inspiration" },
-      { text: "In the middle of every difficulty lies opportunity.", category: "Motivation" },
-      { text: "Life is what happens when you're busy making other plans.", category: "Life" }
-    ];
-  
-    const quoteDisplay = document.getElementById('quoteDisplay');
-    const newQuoteButton = document.getElementById('newQuote');
-  
-    newQuoteButton.addEventListener('click', displayRandomQuote);
-  
-    function displayRandomQuote() {
-      const randomIndex = Math.floor(Math.random() * quotes.length);
-      const quote = quotes[randomIndex];
-      quoteDisplay.textContent = `"${quote.text}" - ${quote.category}`;
-    }
-  
-    window.addQuote = function() {
-      const newQuoteText = document.getElementById('newQuoteText').value;
-      const newQuoteCategory = document.getElementById('newQuoteCategory').value;
-      
-      if (newQuoteText && newQuoteCategory) {
-        quotes.push({ text: newQuoteText, category: newQuoteCategory });
-        document.getElementById('newQuoteText').value = '';
-        document.getElementById('newQuoteCategory').value = '';
-        alert('New quote added successfully!');
-      } else {
-        alert('Please enter both quote text and category.');
-      }
-    }
-  });
+// script.js
+const quoteDisplay = document.getElementById('quoteDisplay');
+const newQuoteButton = document.getElementById('newQuote');
+
+// Sample quotes
+const quotes = [
+  { text: 'The only way to do great work is to love what you do.', author: 'Steve Jobs', category: 'Inspiration' },
+  {text: "The only limit to our realization of tomorrow is our doubts of today.", category: "Inspiration"},
+  { text: 'In the middle of difficulty lies opportunity.', author: 'Albert Einstein', category: 'Inspiration' },
+  // ... more quotes
+];
+
+function showRandomQuote() {
+  const randomIndex = Math.floor(Math.random() * quotes.length);
+  const randomQuote = quotes[randomIndex];
+  quoteDisplay.textContent = `${randomQuote.text} - ${randomQuote.author}`;
+}
+
+newQuoteButton.addEventListener('click', showRandomQuote);
+const newQuoteForm = document.createElement('form');
+const newQuoteText = document.getElementById('newQuoteText');
+const newQuoteCategory = document.getElementById('newQuoteCategory');
+
+newQuoteForm.innerHTML = `
+  <input type="text" id="newQuoteText" placeholder="Enter a new quote">
+  <input type="text" id="newQuoteCategory" placeholder="Enter quote category">
+  <button type="submit">Add Quote</button>
+`;
+
+document.body.appendChild(newQuoteForm);
+
+function addQuote(event) {
+  event.preventDefault();
+  const newQuote = {
+    text: newQuoteText.value,
+    category: newQuoteCategory.value,
+  };
+  quotes.push(newQuote);
+  showRandomQuote(); // Display the newly added quote
+  newQuoteText.value = '';
+  newQuoteCategory.value = '';
+}
+
+newQuoteForm.addEventListener('submit', addQuote);
   
